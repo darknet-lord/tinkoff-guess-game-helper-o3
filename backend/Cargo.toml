@@ -1,0 +1,12 @@
+[package]
+name = "tinkoff_guess_game_helper_py"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "tinkoff_guess_game_helper_py"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.18.0", features = ["extension-module"] }
+tinkoff_guess_game_helper = { git = "https://github.com/darknet-lord/tinkoff-guess-game-helper" }

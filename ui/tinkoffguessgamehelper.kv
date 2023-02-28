@@ -1,0 +1,84 @@
+<CustLabel@Label>:
+    color: .761, .190, .810, 1
+
+<Letter@TextInput>:
+    background_color: 0.5, 0.5, 0.5, 1
+
+<LetterGroup@BoxLayout>:
+    orientation: "vertical"
+
+    Letter:
+        id: letter
+
+    BoxLayout:
+        orientation: "horizontal"
+
+        ColorButton:
+            text: "G"
+            id: grey
+            group: "color_group" + str(self.parent.uid)
+            on_press: self.change_color("grey")
+
+        ColorButton:
+            text: "Y"
+            id: yellow
+            group: "color_group" + str(self.parent.uid)
+            on_press: self.change_color("yellow")
+
+        ColorButton:
+            text: "W"
+            id: white
+            group: "color_group" + str(self.parent.uid)
+            on_press: self.change_color("white")
+
+<WordGroup@BoxLayout>:
+    id: word_group
+    orientation: "horizontal"
+    canvas:
+        Color:
+            rgba: 0.9, 0.9, 0.9, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    padding: 10
+    LetterGroup:
+        id: l0
+    LetterGroup:
+        id: l1
+    LetterGroup:
+        id: l2
+    LetterGroup:
+        id: l3
+    LetterGroup:
+        id: l4
+
+<MainWindow>:
+    BoxLayout:
+        orientation: "vertical"
+        WordGroup:
+            id: w0
+        WordGroup:
+            id: w1
+        WordGroup:
+            id: w2
+        WordGroup:
+            id: w3
+        WordGroup:
+            id: w4
+        WordGroup:
+            id: w5
+        SuggestButton:
+            text: "Suggest"
+            on_press: self.suggest_words()
+
+
+<SuggestWordsWindow>:
+    BoxLayout:
+        orientation: "vertical"
+        BoxLayout:
+            orientation: "vertical"
+            id: suggested_words
+        Button:
+            size_hint: 1, 0.1
+            on_press: self.parent.parent.apply_suggestions()
+            text: "Apply"
