@@ -1,11 +1,22 @@
 <CustLabel@Label>:
     color: .761, .190, .810, 1
 
-<Letter@TextInput>:
+<Letter>:
+    halign: "center"
     background_color: 0.5, 0.5, 0.5, 1
+    font_size: 30
+    size_hint: (1, 2)
+    height: 30
+
+<ColorButton>:
+    size_hint: (5, 1)
+    height: 5
+    font_size: 10 
 
 <LetterGroup@BoxLayout>:
     orientation: "vertical"
+    size_hint: (1, 1)
+    height: 10
 
     Letter:
         id: letter
@@ -34,13 +45,14 @@
 <WordGroup@BoxLayout>:
     id: word_group
     orientation: "horizontal"
+    size_hint: (1, .9)
+    padding: 10
     canvas:
         Color:
             rgba: 0.9, 0.9, 0.9, 1
         Rectangle:
             size: self.size
             pos: self.pos
-    padding: 10
     LetterGroup:
         id: l0
     LetterGroup:
@@ -70,7 +82,7 @@
         SuggestButton:
             text: "Suggest"
             on_press: self.suggest_words()
-
+            size_hint: 1, 1
 
 <SuggestWordsWindow>:
     BoxLayout:
@@ -79,6 +91,6 @@
             orientation: "vertical"
             id: suggested_words
         Button:
-            size_hint: 1, 0.1
+            size_hint: 1, 0.2
             on_press: self.parent.parent.apply_suggestions()
             text: "Apply"

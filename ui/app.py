@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 from dataclasses import dataclass
 
@@ -89,7 +90,6 @@ class ColorButton(ToggleButton):
         words_cache.words[current_word_id][
             current_letter_id
         ].color = CachedWordLetterColor.string_to_color(color_name)
-        print(current_word_id, current_letter_id)
         self.parent.parent.ids["letter"].background_color = color
 
     def current_word_id(self):
@@ -113,17 +113,24 @@ class SuggestButton(Button):
         app.root.current = "SuggestWordsWindow"
 
 
-class LetterInput(TextInput):
+class Letter(TextInput):
     _max_length = 1
+    _ptrn = re.compile(r"^[а-я]*$")
 
     def __init__(self, letter=None, color=Color.GREY, **kwargs):
         super().__init__(**kwargs)
         self.letter = letter
         self.color = color
 
+    def is_valid(self, text):
+        if len(self.text) >= self._max_length:
+            return False
+        return bool(re.match(self._ptrn, text))
+
     def insert_text(self, substring, from_undo=False):
-        if len(self.text) < self._max_length:
-            return super().insert_text(substring, from_undo=from_undo)
+        text = substring.lower()
+        if self.is_valid(text):
+            return super().insert_text(text, from_undo=from_undo)
 
 
 class MainWindow(Screen):
@@ -180,7 +187,6 @@ class SuggestWordsWindow(Screen):
         if words_cache.is_empty:
             words = suggest()
         else:
-            print(list(words_cache.make_arguments()))
             words = guess(list(words_cache.make_arguments()))
 
         self.words.clear()
