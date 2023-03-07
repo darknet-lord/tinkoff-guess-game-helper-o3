@@ -120,8 +120,17 @@ class Letter(TextInput):
     def __init__(self, letter=None, color=Color.GREY, **kwargs):
         super().__init__(**kwargs)
         self.letter = letter
-        self.color = color.value
-        self.disabled = True
+        self.color = color
+
+    def is_valid(self, text):
+        if len(self.text) >= self._max_length:
+            return False
+        return bool(re.match(self._ptrn, text))
+
+    def insert_text(self, substring, from_undo=False):
+        text = substring.lower()
+        if self.is_valid(text):
+            return super().insert_text(text, from_undo=from_undo)
 
 
 class MainWindow(Screen):
@@ -200,7 +209,3 @@ class TinkoffGuessGameHelperApp(App):
         screen_manager.add_widget(MainWindow(name="MainWindow"))
         screen_manager.add_widget(SuggestWordsWindow(name="SuggestWordsWindow"))
         return screen_manager
-
-
-if __name__ == "__main__":
-    TinkoffGuessGameHelperApp().run()
