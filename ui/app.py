@@ -82,31 +82,6 @@ class Color(Enum):
         }[colorname[0]]
 
 
-class ColorButton(ToggleButton):
-    def change_color(self, color_name):
-        color = Color.string_to_color(color_name).value
-        current_word_id = self.current_word_id()
-        current_letter_id = self.current_letter_id()
-        words_cache.words[current_word_id][
-            current_letter_id
-        ].color = CachedWordLetterColor.string_to_color(color_name)
-        self.parent.parent.ids["letter"].background_color = color
-
-    def current_word_id(self):
-        return next(
-            int(id_[1])
-            for id_, val in self.parent.parent.parent.parent.parent.ids.items()
-            if val == self.parent.parent.parent
-        )
-
-    def current_letter_id(self):
-        return next(
-            int(id_[1])
-            for id_, val in self.parent.parent.parent.ids.items()
-            if val == self.parent.parent
-        )
-
-
 class SuggestButton(Button):
     def suggest_words(self):
         app = App.get_running_app()
@@ -130,7 +105,57 @@ class Letter(TextInput):
     def insert_text(self, substring, from_undo=False):
         text = substring.lower()
         if self.is_valid(text):
+            self.letter = text
+
+            if word := words_cache.words[self.current_word_id()]:
+                if letter := word.get(self.current_letter_id()):
+                    letter.letter = text
+                else:
+                    word[self.current_letter_id()] = CachedWordLetter(letter=text, color=CachedWordLetterColor.GREY)
+            else:
+                words_cache.words[self.current_word_id()] = {
+                    self.current_letter_id(): CachedWordLetter(letter=text, color=CachedWordLetterColor.GREY)
+                }
             return super().insert_text(text, from_undo=from_undo)
+
+    def current_word_id(self):
+        return next(
+            int(id_[1])
+            for id_, val in self.parent.parent.parent.parent.ids.items()
+            if val == self.parent.parent
+        )
+
+    def current_letter_id(self):
+        return next(
+            int(id_[1])
+            for id_, val in self.parent.parent.ids.items()
+            if val == self.parent
+        )
+
+
+class ColorButton(ToggleButton):
+    def change_color(self, color_name):
+        color = Color.string_to_color(color_name).value
+        current_word_id = self.current_word_id()
+        current_letter_id = self.current_letter_id()
+
+        if (w := words_cache.words[current_word_id]) and (letter := w[current_letter_id]):
+            letter.color = CachedWordLetterColor.string_to_color(color_name)
+            self.parent.parent.ids["letter"].background_color = color
+
+    def current_word_id(self):
+        return next(
+            int(id_[1])
+            for id_, val in self.parent.parent.parent.parent.parent.ids.items()
+            if val == self.parent.parent.parent
+        )
+
+    def current_letter_id(self):
+        return next(
+            int(id_[1])
+            for id_, val in self.parent.parent.parent.ids.items()
+            if val == self.parent.parent
+        )
 
 
 class MainWindow(Screen):
