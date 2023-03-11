@@ -77,20 +77,28 @@
             id: w3
         WordGroup:
             id: w4
-        WordGroup:
-            id: w5
-        SuggestButton:
-            text: "Suggest"
-            on_press: self.suggest_words()
+        Button:
+            text: "Guess"
+            on_press:
+                root.manager.current = "ResultWindow"
+                root.manager.transition.direction = 'left'
             size_hint: 1, 1
 
-<SuggestWordsWindow>:
+<ResultWindow>:
     BoxLayout:
         orientation: "vertical"
         BoxLayout:
             orientation: "vertical"
             id: suggested_words
-        Button:
-            size_hint: 1, 0.2
-            on_press: self.parent.parent.apply_suggestions()
-            text: "Apply"
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                on_press:
+                    root.manager.current = "MainWindow"
+                    root.manager.transition.direction = 'right'
+                size_hint: 1, 0.2
+                text: "Back"
+            Button:
+                size_hint: 1, 0.2
+                on_press: app.stop()
+                text: "Exit"

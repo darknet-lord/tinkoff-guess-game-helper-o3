@@ -8,12 +8,11 @@ from kivy.uix.checkbox import CheckBox
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.textinput import TextInput
-from kivy.uix.button import Button
 from kivy.uix.togglebutton import ToggleButton
-from tinkoff_guess_game_helper_py import suggest, guess
+from tinkoff_guess_game_helper_py import guess
 
 
-WORDS_COUNT = 6
+WORDS_COUNT = 5
 LETTERS_COUNT = 5
 
 
@@ -80,12 +79,6 @@ class Color(Enum):
             CachedWordLetterColor.WHITE.value: cls.WHITE,
             CachedWordLetterColor.YELLOW.value: cls.YELLOW,
         }[colorname[0]]
-
-
-class SuggestButton(Button):
-    def suggest_words(self):
-        app = App.get_running_app()
-        app.root.current = "SuggestWordsWindow"
 
 
 class Letter(TextInput):
@@ -174,63 +167,37 @@ class MainWindow(Screen):
                 word_elem.ids[f"l{lidx}"].children[0].children[2].state = "down"
 
 
-class SuggestCheckBox(CheckBox):
-    def __init__(self, word, **kwargs):
-        super().__init__(**kwargs)
-        self.word = word
-
-
-class SuggestWordsWindow(Screen):
-    def __init__(self, **kw):
-        super().__init__(**kw)
-        self.words = set([])
-
-    def apply_suggestions(self):
-        app = App.get_running_app()
-
-        rng = iter(range(*words_cache.available_slots))
-        for word in self.words:
-            try:
-                idx = next(rng)
-                cached_word = {
-                    i: CachedWordLetter(letter, CachedWordLetterColor.GREY)
-                    for i, letter in enumerate(word)
-                }
-                words_cache.add(idx, cached_word)
-            except StopIteration:
-                break
-
-        app.root.current = "MainWindow"
-
-    def update_words(self, checkbox):
-        if checkbox.active:
-            self.words.add(checkbox.word)
-        else:
-            self.words.discard(checkbox.word)
+class ResultWindow(Screen):
 
     def on_pre_enter(self, *args):
-        if words_cache.is_empty:
-            words = suggest()
-        else:
-            words = guess(list(words_cache.make_arguments()))
+        words = guess(list(words_cache.make_arguments()))
 
-        self.words.clear()
         box = self.ids["suggested_words"]
         box.clear_widgets()
 
         for word in words[:10]:
             row = BoxLayout(orientation="horizontal", height=100)
-            chb = SuggestCheckBox(word=word, active=True)
-            self.words.add(word)
-            chb.bind(on_release=self.update_words)
-            row.add_widget(chb)
             row.add_widget(Label(text=word))
             box.add_widget(row)
 
 
 class TinkoffGuessGameHelperApp(App):
+
+    @staticmethod
+    def _populate(main_window):
+        initial_words = guess([])
+        for word_idx, word in enumerate(initial_words):
+            wi = f"w{word_idx}"
+            words_cache.words[word_idx] = {}
+            for letter_idx, letter in enumerate(word):
+                main_window.ids[wi].ids[f"l{letter_idx}"].ids['letter'].text = letter
+                words_cache.words[word_idx][letter_idx] = CachedWordLetter(
+                    letter=letter, color=CachedWordLetterColor.GREY)
+
     def build(self):
         screen_manager = ScreenManager()
-        screen_manager.add_widget(MainWindow(name="MainWindow"))
-        screen_manager.add_widget(SuggestWordsWindow(name="SuggestWordsWindow"))
+        main_window = MainWindow(name="MainWindow")
+        self._populate(main_window)
+        screen_manager.add_widget(main_window)
+        screen_manager.add_widget(ResultWindow(name="ResultWindow"))
         return screen_manager
